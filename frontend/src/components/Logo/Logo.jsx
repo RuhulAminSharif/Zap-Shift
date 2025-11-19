@@ -1,11 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
 
 const Logo = () => {
   return (
-    <div>
+    <div className="flex items-end ">
       <img src={logo} alt="Logo" srcset="" />
+      <h3 className="text-3xl font-bold -ms-2.5">Zaf Shift</h3>
     </div>
   );
 };

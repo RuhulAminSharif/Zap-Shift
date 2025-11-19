@@ -1,4 +1,5 @@
 import React from "react";
+import Logo from "../../../components/Logo/Logo";
 import { NavLink } from "react-router";
 
 const NavBar = () => {
@@ -44,7 +45,7 @@ const NavBar = () => {
           </ul>
         </div>
         <a className="btn btn-ghost text-xl">
-          
+          <Logo></Logo>
         </a>
       </div>
       <div className="navbar-center hidden lg:flex">
