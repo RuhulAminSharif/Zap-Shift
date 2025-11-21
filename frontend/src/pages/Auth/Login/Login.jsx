@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import { Link } from "react-router";
+import SocialLogin from "../SocialLogin/SocialLogin";
 
 const Login = () => {
   const {
@@ -60,7 +61,7 @@ const Login = () => {
           <button className="btn btn-neutral mt-4">Login</button>
         </fieldset>
         <p>
-          New to Zap Shift{" "}
+          New to Zap Shift?{" "}
           <Link
             state={location.state}
             className="text-blue-400 underline"
@@ -70,6 +71,7 @@ const Login = () => {
           </Link>
         </p>
       </form>
+      <SocialLogin></SocialLogin>
     </div>
   );
 };
