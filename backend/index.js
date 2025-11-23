@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vyznij5.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ofhbk5b.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,6 +28,15 @@ async function run() {
 
     const db = client.db("zap_shift_db");
     const parcelsCollection = db.collection("parcels");
+
+    app.get("/parcels", async (req, res) => {});
+
+    app.post("/parcels", async (req, res) => {
+      const parcel = req.body;
+      console.log(5);
+      const result = await parcelsCollection.insertOne(parcel);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
