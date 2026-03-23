@@ -31,7 +31,6 @@ const MyParcels = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axiosSecure.delete(`/parcels/${id}`).then((res) => {
-          
           if (res.data.deletedCount) {
             // refresh the data in the ui
             refetch();
@@ -45,6 +44,22 @@ const MyParcels = () => {
         });
       }
     });
+  };
+
+  const handlePayment = async (parcel) => {
+    const paymentInfo = {
+      cost: parcel.cost,
+      parcelId: parcel._id,
+      senderEmail: parcel.senderEmail,
+      parcelName: parcel.parcelName,
+      trackingId: parcel.trackingId,
+    };
+    const res = await axiosSecure.post(
+      "/payment-checkout-session",
+      paymentInfo,
+    );
+
+    window.location.assign(res.data.url);
   };
 
   return (
@@ -73,7 +88,10 @@ const MyParcels = () => {
                   {parcel.paymentStatus === "paid" ? (
                     <span className="text-green-800">Paid</span>
                   ) : (
-                    <button className="btn btn-sm btn-primary text-black">
+                    <button
+                      onClick={() => handlePayment(parcel)}
+                      className="btn btn-sm btn-primary text-black"
+                    >
                       Pay
                     </button>
                   )}

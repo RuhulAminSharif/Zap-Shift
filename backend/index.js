@@ -6,6 +6,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.PORT || 3000;
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
 // middleware
 app.use(express.json());
 app.use(cors());
@@ -63,6 +65,52 @@ async function run() {
 
       const result = await parcelsCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // Payment related apis
+    app.post("/payment-checkout-session", async (req, res) => {
+      const paymentInfo = req.body;
+      const amount = parseInt(paymentInfo.cost) * 100;
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: "USD",
+              product_data: {
+                name: paymentInfo.parcelName,
+              },
+              unit_amount: amount,
+            },
+            quantity: 1,
+          },
+        ],
+        customer_email: paymentInfo.senderEmail,
+        mode: "payment",
+        metadata: {
+          parcelId: paymentInfo.parcelId,
+        },
+        success_url: `${process.env.SITE_DOMAIN}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.SITE_DOMAIN}/dashboard/payment-cancelled`,
+      });
+
+      res.send({ url: session.url });
+    });
+
+    app.patch("/payment-success", async (req, res) => {
+      const sessionId = req.query.session_id;
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      if (session.payment_status === "paid") {
+        const id = session.metadata.parcelId;
+        const query = { _id: new ObjectId(id) };
+        const update = {
+          $set: {
+            paymentStatus: "paid",
+          },
+        };
+        const result = await parcelsCollection.updateOne(query, update);
+        res.send({ success: true });
+      }
+      res.send({ success: false });
     });
 
     // Send a ping to confirm a successful connection
