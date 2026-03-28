@@ -51,7 +51,7 @@ async function run() {
       }
 
       const optinos = { sort: { createdAT: -1 } };
-      
+
       const cursor = parcelsCollection.find(query, optinos);
       const result = await cursor.toArray();
       res.send(result);
@@ -113,7 +113,20 @@ async function run() {
     app.patch("/payment-success", async (req, res) => {
       const sessionId = req.query.session_id;
       const session = await stripe.checkout.sessions.retrieve(sessionId);
-      const trackingId = generateTrackingId()
+      
+      const transactionId = session.payment_intent;
+      const query = {transactionId: transactionId}
+      
+      const isPaymentExist = await paymentCollection.findOne(query)
+      if(isPaymentExist) {
+        return res.send({
+          message: "already exists",
+          transactionId: transactionId,
+          trackingId: isPaymentExist.trackingId
+        })
+      }
+      
+      const trackingId = generateTrackingId();
       
       if (session.payment_status === "paid") {
         const id = session.metadata.parcelId;
@@ -125,7 +138,7 @@ async function run() {
           },
         };
         const result = await parcelsCollection.updateOne(query, update);
-        
+
         const payment = {
           amount: session.amount_total / 100,
           currency: session.currency,
@@ -135,8 +148,9 @@ async function run() {
           transactionId: session.payment_intent,
           paymentStatus: session.payment_status,
           paidAt: new Date(),
+          trackingId: trackingId
         };
-        
+
         if (session.payment_status === "paid") {
           const resultPayment = await paymentCollection.insertOne(payment);
 
