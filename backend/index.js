@@ -67,6 +67,8 @@ async function run() {
     const usersCollection = db.collection("users");
     const parcelsCollection = db.collection("parcels");
     const paymentCollection = db.collection("payments");
+    const ridersCollection = db.collection("riders");
+
 
     // user related apis 
     app.post("/users", async (req, res) => {
@@ -93,7 +95,7 @@ async function run() {
         query.senderEmail = email;
       }
 
-      const optinos = { sort: { createdAT: -1 } };
+      const optinos = { sort: { createdAt: -1 } };
 
       const cursor = parcelsCollection.find(query, optinos);
       const result = await cursor.toArray();
@@ -226,6 +228,16 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // riders related apis
+    app.post("/riders", async(req, res) => {
+      const rider = req.body
+      rider.status = "pending"
+      rider.createdAt = new Date()
+
+      const result = await ridersCollection.insertOne(rider)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
