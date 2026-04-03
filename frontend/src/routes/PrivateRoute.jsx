@@ -1,17 +1,14 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router";
 import useAuth from "../hooks/useAuth";
+import Loading from "../components/Loading/Loading";
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="mx-auto h-10">
-        <span className="loading loading-infinity loading-xl"></span>
-      </div>
-    );
+    return <Loading></Loading>;
   }
 
   if (!user) {
