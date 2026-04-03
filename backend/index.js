@@ -68,6 +68,20 @@ async function run() {
     const paymentCollection = db.collection("payments");
     const ridersCollection = db.collection("riders");
 
+    // middle admin before allowing admin activity
+    // must be used after verifyFBToken middleware
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded_email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+
+      if (!user || user.role !== "admin") {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      next();
+    };
+
     // user related apis
     app.get("/users", verifyFBToken, async (req, res) => {
       const searchText = req.query.searchText;
@@ -114,18 +128,23 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/users/:id/role", verifyFBToken, async (req, res) => {
-      const id = req.params.id;
-      const roleInfo = req.body;
-      const query = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          role: roleInfo.role,
-        },
-      };
-      const result = await usersCollection.updateOne(query, updatedDoc);
-      res.send(result);
-    });
+    app.patch(
+      "/users/:id/role",
+      verifyFBToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const roleInfo = req.body;
+        const query = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            role: roleInfo.role,
+          },
+        };
+        const result = await usersCollection.updateOne(query, updatedDoc);
+        res.send(result);
+      },
+    );
 
     // parcel api
     app.get("/parcels", async (req, res) => {
@@ -290,7 +309,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/riders/:id", verifyFBToken, async (req, res) => {
+    app.patch("/riders/:id", verifyFBToken, verifyAdmin, async (req, res) => {
       const status = req.body.status;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
