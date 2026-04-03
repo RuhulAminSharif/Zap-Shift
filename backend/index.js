@@ -15,7 +15,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 function generateTrackingId() {
@@ -69,8 +68,7 @@ async function run() {
     const paymentCollection = db.collection("payments");
     const ridersCollection = db.collection("riders");
 
-
-    // user related apis 
+    // user related apis
     app.get("/users", verifyFBToken, async (req, res) => {
       const searchText = req.query.searchText;
       const query = {};
@@ -92,6 +90,15 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users/:id", async (req, res) => {});
+
+    app.get("/users/:email/role", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      res.send({ role: user?.role || "user" });
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       user.role = "user";
@@ -104,6 +111,19 @@ async function run() {
       }
 
       const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.patch("/users/:id/role", verifyFBToken, async (req, res) => {
+      const id = req.params.id;
+      const roleInfo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: roleInfo.role,
+        },
+      };
+      const result = await usersCollection.updateOne(query, updatedDoc);
       res.send(result);
     });
 
@@ -245,7 +265,7 @@ async function run() {
         }
       }
 
-      const cursor = paymentCollection.find(query).sort({paidAt: -1});
+      const cursor = paymentCollection.find(query).sort({ paidAt: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -261,14 +281,14 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/riders", async(req, res) => {
-      const rider = req.body
-      rider.status = "pending"
-      rider.createdAt = new Date()
+    app.post("/riders", async (req, res) => {
+      const rider = req.body;
+      rider.status = "pending";
+      rider.createdAt = new Date();
 
-      const result = await ridersCollection.insertOne(rider)
-      res.send(result)
-    })
+      const result = await ridersCollection.insertOne(rider);
+      res.send(result);
+    });
 
     app.patch("/riders/:id", verifyFBToken, async (req, res) => {
       const status = req.body.status;
