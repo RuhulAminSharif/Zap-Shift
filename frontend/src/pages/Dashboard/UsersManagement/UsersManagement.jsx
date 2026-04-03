@@ -54,7 +54,6 @@ const UsersManagement = () => {
   return (
     <div>
       <h2 className="text-4xl">Manage Users: {users.length}</h2>
-      <p>search text: {searchText}</p>
       <label className="input">
         <svg
           className="h-[1em] opacity-50"
@@ -94,7 +93,7 @@ const UsersManagement = () => {
           </thead>
           <tbody>
             {users.map((user, index) => (
-              <tr>
+              <tr key={index}>
                 <td>{index + 1}</td>
                 <td>
                   <div className="flex items-center gap-3">
