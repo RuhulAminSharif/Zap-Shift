@@ -149,15 +149,20 @@ async function run() {
     // parcel api
     app.get("/parcels", async (req, res) => {
       const query = {};
-      const { email } = req.params;
+      const { email, deliveryStatus } = req.query;
 
+      // /parcels?email=''&
       if (email) {
         query.senderEmail = email;
       }
 
-      const optinos = { sort: { createdAt: -1 } };
+      if (deliveryStatus) {
+        query.deliveryStatus = deliveryStatus;
+      }
 
-      const cursor = parcelsCollection.find(query, optinos);
+      const options = { sort: { createdAt: -1 } };
+
+      const cursor = parcelsCollection.find(query, options);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -239,6 +244,7 @@ async function run() {
         const update = {
           $set: {
             paymentStatus: "paid",
+            deliveryStatus: "pending-pickup",
             trackingId: trackingId,
           },
         };
