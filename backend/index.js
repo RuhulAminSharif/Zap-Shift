@@ -322,6 +322,7 @@ async function run() {
       const updatedDoc = {
         $set: {
           status: status,
+          workStatus: "available",
         },
       };
 
