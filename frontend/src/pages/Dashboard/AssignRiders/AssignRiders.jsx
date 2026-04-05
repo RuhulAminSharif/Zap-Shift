@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
 
 const AssignRiders = () => {
   const axiosSecure = useAxiosSecure();
+  const riderModalRef = useRef();
 
   const { data: parcels = [] } = useQuery({
     queryKey: ["parcels", "pending-pickup"],
@@ -14,6 +15,10 @@ const AssignRiders = () => {
       return res.data;
     },
   });
+
+  const openAssignRiderModal = (parcel) => {
+    riderModalRef.current.showModal();
+  };
   return (
     <div>
       <h2 className="text-5xl">Assign Riders: {parcels.length}</h2>
@@ -40,7 +45,10 @@ const AssignRiders = () => {
                 <td>{parcel.createdAt}</td>
                 <td>{parcel.senderDistrict}</td>
                 <td>
-                  <button className="btn btn-primary text-black">
+                  <button
+                    onClick={() => openAssignRiderModal(parcel)}
+                    className="btn btn-primary text-black"
+                  >
                     Find Riders
                   </button>
                 </td>
@@ -49,6 +57,21 @@ const AssignRiders = () => {
           </tbody>
         </table>
       </div>
+      <dialog
+        ref={riderModalRef}
+        className="modal modal-bottom sm:modal-middle"
+      >
+        <div className="modal-box">
+          <h2>Modal</h2>
+
+          <div className="modal-action">
+            <form method="dialog">
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn">Close</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 };
