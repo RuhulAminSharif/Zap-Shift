@@ -67,6 +67,7 @@ async function run() {
     const parcelsCollection = db.collection("parcels");
     const paymentCollection = db.collection("payments");
     const ridersCollection = db.collection("riders");
+    const trackingsCollection = db.collection("trackings");
 
     // middle admin before allowing admin activity
     // must be used after verifyFBToken middleware
@@ -174,7 +175,7 @@ async function run() {
       if (riderEmail) {
         query.riderEmail = riderEmail;
       }
-      
+
       if (deliveryStatus !== "parcel_delivered") {
         // query.deliveryStatus = {$in: ['driver_assigned', 'rider_arriving']}
         query.deliveryStatus = { $nin: ["parcel_delivered"] };
@@ -202,7 +203,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/parcels/:id", async (req, res) => {
+    app.patch("/parcels/:id/assign", async (req, res) => {
       const { riderId, riderName, riderEmail } = req.body;
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };

@@ -44,7 +44,7 @@ const AssignRiders = () => {
       trackingId: selectedParcel.trackingId,
     };
     axiosSecure
-      .patch(`/parcels/${selectedParcel._id}`, riderAssignInfo)
+      .patch(`/parcels/${selectedParcel._id}/assign`, riderAssignInfo)
       .then((res) => {
         if (res.data.modifiedCount) {
           riderModalRef.current.close();
